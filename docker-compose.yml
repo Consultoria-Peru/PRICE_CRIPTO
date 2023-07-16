@@ -1,0 +1,35 @@
+version: "3.8"
+services:
+  webserver:
+    build: .
+    restart: always
+    command: airflow webserver
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    environment:
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@db/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+
+  scheduler:
+    build: .
+    restart: always
+    command: airflow scheduler
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+    depends_on:
+      - db
+    environment:
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@db/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
