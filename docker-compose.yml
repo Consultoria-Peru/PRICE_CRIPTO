@@ -3,7 +3,17 @@ services:
   webserver:
     build: .
     restart: always
-    command: airflow webserver
+    command: >
+      bash -c "airflow db reset -y &&
+      airflow db init &&
+      airflow users create \
+        --username airflow \
+        --firstname Airflow \
+        --lastname User \
+        --role Admin \
+        --email airflow@example.com \
+        --password airflow &&
+      airflow webserver"
     volumes:
       - ./dags:/usr/local/airflow/dags
     ports:
@@ -33,3 +43,5 @@ services:
       - POSTGRES_USER=airflow
       - POSTGRES_PASSWORD=airflow
       - POSTGRES_DB=airflow
+    environment:
+      - TZ=America/Lima
