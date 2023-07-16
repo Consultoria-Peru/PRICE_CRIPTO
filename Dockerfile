@@ -1,5 +1,5 @@
 # Usar una imagen de python como base
-FROM python:3.8-slim-buster
+FROM python:3.10.12-slim-bullseye
 
 # Variables de entorno para las versiones de Airflow y Python
 ARG AIRFLOW_VERSION=2.6.3
@@ -12,7 +12,7 @@ RUN apt-get update -y \
     ufw net-tools bleachbit wget python3-pip python3-venv git gdebi curl \
     build-essential gdb lcov pkg-config libbz2-dev libffi-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
     libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev lzma lzma-dev tk-dev uuid-dev zlib1g-dev \
-    libpq-dev lsof unrar \
+    libpq-dev lsof  \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
