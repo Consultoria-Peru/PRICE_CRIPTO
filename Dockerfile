@@ -1,24 +1,23 @@
 # Usar una imagen de python como base
 FROM python:3.10.12-slim-bullseye
 
+
 # Variables de entorno para las versiones de Airflow y Python
 ARG AIRFLOW_VERSION=2.6.3
-ARG PYTHON_VERSION=3.8
+ARG PYTHON_VERSION=3.10
 
 # Actualizar e instalar dependencias del sistema
 RUN apt-get update -y \
   && apt-get upgrade -y \
   && apt-get install -y --no-install-recommends \
-    ufw net-tools bleachbit wget python3-pip python3-venv git gdebi curl \
+    ufw net-tools bleachbit wget git gdebi curl \
     build-essential gdb lcov pkg-config libbz2-dev libffi-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
     libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev lzma lzma-dev tk-dev uuid-dev zlib1g-dev \
-    libpq-dev lsof  \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+    libpq-dev lsof
 
-# Direcciones para el usuario y base de Airflow
-ARG AIRFLOW_USER_HOME=/usr/local/airflow
-ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
+# Limpiar el caché de apt
+RUN apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 # Instalar Apache Airflow con constraints
 RUN CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt" \
@@ -29,6 +28,8 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Crear el directorio y usuario de Airflow
+ARG AIRFLOW_USER_HOME=/usr/local/airflow
+ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 RUN useradd -ms /bin/bash -d ${AIRFLOW_USER_HOME} airflow
 WORKDIR ${AIRFLOW_USER_HOME}
 USER airflow
