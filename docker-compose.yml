@@ -5,10 +5,10 @@ services:
     restart: always
     command: > 
       bash -c "airflow db reset -y && 
+      airflow db upgrade &&
       airflow db init && 
       airflow users create --username airflow --firstname Airflow --lastname User --role Admin --email airflow@example.com --password airflow && 
       airflow webserver"
-
     volumes:
       - ./dags:/usr/local/airflow/dags
     ports:
@@ -17,7 +17,7 @@ services:
       - db
       - kafka
     environment:
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@db/airflow
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@db/airflow
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
 
   scheduler:
@@ -29,8 +29,9 @@ services:
     depends_on:
       - db
       - kafka
+      - webserver
     environment:
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@db/airflow
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@db/airflow
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
 
   db:
