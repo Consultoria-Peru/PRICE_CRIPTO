@@ -38,7 +38,7 @@ USER airflow
 RUN airflow db init
 
 # Copiar la configuración y DAGs existentes
-COPY --chown=airflow:airflow dags/ ${AIRFLOW_USER_HOME}/dags/
+##COPY --chown=airflow:airflow dags/ ${AIRFLOW_USER_HOME}/dags/
 COPY --chown=airflow:airflow config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
 
 # Configurar el servidor web de Airflow para escuchar en todas las direcciones
