@@ -23,7 +23,8 @@ services:
   scheduler:
     build: .
     restart: always
-    command: bash -c "sleep 180 && airflow scheduler"
+    command: > 
+      bash -c "sleep 180 && airflow scheduler"
     volumes:
       - ./dags:/usr/local/airflow/dags
     depends_on:
