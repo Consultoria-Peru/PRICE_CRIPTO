@@ -30,7 +30,7 @@ services:
     command: > 
       bash -c "sleep 180 && airflow scheduler"
     volumes:
-      - ./dags:/usr/local/airflow/dags
+      - .APACHE_AIRFLOW/dags:/usr/local/airflow/dags
     depends_on:
       - db
       - webserver
@@ -58,7 +58,7 @@ services:
     environment:
       - KAFKA_USER_HOME=/usr/local/kafka
     volumes:
-      - ./CONTENEDOR1/apache-zookeeper-3.8.1-bin:/usr/local/kafka  # replace with the actual directory
+      - ./APACHE_KAFKA/CONTENEDOR1/apache-zookeeper-3.8.1-bin:/usr/local/kafka  
     restart: always
 
   kafka:
@@ -70,7 +70,7 @@ services:
     environment:
       - KAFKA_USER_HOME=/usr/local/kafka
     volumes:
-      - ./CONTENEDOR2/kafka_2.13-3.5.0:/usr/local/kafka  # replace with the actual directory
+      - ./APACHE_KAFKA/CONTENEDOR2/kafka_2.13-3.5.0:/usr/local/kafka 
     depends_on:
       - zookeeper
     restart: always
