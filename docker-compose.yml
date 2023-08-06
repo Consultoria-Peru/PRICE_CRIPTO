@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   webserver:
-    build: .
+    build: 
+      context: ./APACHE_AIRFLOW/
+      dockerfile: Dockerfile-airflow
     restart: always
     command: > 
       bash -c "airflow db reset -y && 
@@ -21,7 +23,9 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
 
   scheduler:
-    build: .
+    build: 
+      context: ./APACHE_AIRFLOW/
+      dockerfile: Dockerfile-airflow
     restart: always
     command: > 
       bash -c "sleep 180 && airflow scheduler"
@@ -45,7 +49,7 @@ services:
 
   zookeeper:
     build: 
-      context: ./CONTENEDOR1
+      context: ./APACHE_KAFKA/CONTENEDOR1
       dockerfile: Dockerfile-zookeeper
     ports:
       - 2181:2181
@@ -59,7 +63,7 @@ services:
 
   kafka:
     build: 
-      context: ./CONTENEDOR2
+      context: ./APACHE_KAFKA/CONTENEDOR2
       dockerfile: Dockerfile-kafka
     ports:
       - 9092:9092
