@@ -1,42 +1,55 @@
 import time
 import requests
 import json
-import os
 from kafka import KafkaProducer
 
-def stream_data(sleep_interval=1):
+api_key = '8ecf23c8-5749-4776-8888-08aa2149fa4a'
 
-    # Configurar el productor de Kafka, reemplazar localhost con la dirección IP de tu host de Kafka
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'])
-    
-    coinmarketcap_api_key = os.environ.get('COINMARKETCAP_API_KEY')
 
-    # Configurar el endpoint y los parámetros de la API de CoinMarketCap
-    api_url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
-    api_parameters = {
+def data_stream(sleep_interval=1):
+    # Configure Kafka producer, replace localhost with your Kafka host IP address
+    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], api_version=(3, 5, 0))
+
+    # Configure CoinMarketCap API endpoint and parameters
+    url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
+    parameters = {
         'symbol': 'BTC,ETH',
         'convert': 'USD'
     }
-    api_headers = {
+    headers = {
         'Accepts': 'application/json',
-        'X-CMC_PRO_API_KEY': coinmarketcap_api_key,
+        'X-CMC_PRO_API_KEY': api_key,
     }
 
     while True:
-        # Realizar solicitud a la API de CoinMarketCap para obtener los precios de BTC y ETH
-        response = requests.get(api_url, headers=api_headers, params=api_parameters)
-        data = json.loads(response.text)
+        # Make API request for BTC and ETH prices
+        data = get_crypto_data(url, headers, parameters)
 
-        # Procesar y enviar los datos de BTC a Kafka
-        send_data_to_kafka(producer, data, 'BTC', 'btc_prices')
+        # Process and send BTC data to Kafka
+        process_and_send_data(producer, data, 'BTC', 'btc_prices')
 
-        # Procesar y enviar los datos de ETH a Kafka
-        send_data_to_kafka(producer, data, 'ETH', 'eth_prices')
+        # Process and send ETH data to Kafka
+        process_and_send_data(producer, data, 'ETH', 'eth_prices')
 
-        # Esperar el intervalo de tiempo especificado antes de hacer la siguiente solicitud
+        # Sleep for the specified interval before making the next request
         time.sleep(sleep_interval)
 
-def send_data_to_kafka(producer, data, symbol, topic):
+def get_crypto_data(url, headers, parameters, retries=3, delay=5):
+    for _ in range(retries):
+        response = requests.get(url, headers=headers, params=parameters)
+        data = json.loads(response.text)
+        if 'data' in data:
+            return data
+        elif 'status' in data and 'error_code' in data['status'] and data['status']['error_code'] == 1008:
+            print("Hit rate limit, sleeping for a minute...")
+            time.sleep(60)
+        else:
+            print(f"Error in API response: {data}, retrying after {delay} seconds...")
+            time.sleep(delay)
+    raise Exception("Failed to get data after multiple retries")
+
+
+def process_and_send_data(producer, data, symbol, topic):
     price_data = data['data'][symbol]['quote']['USD']
 
     extracted_data = {
@@ -49,4 +62,4 @@ def send_data_to_kafka(producer, data, symbol, topic):
     producer.send(topic, json.dumps(extracted_data).encode('utf-8'))
 
 if __name__ == "__main__":
-    stream_data(sleep_interval=1)
+    data_stream(sleep_interval=1)
