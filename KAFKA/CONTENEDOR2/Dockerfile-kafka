@@ -1,0 +1,15 @@
+FROM eclipse-temurin:11-jre
+
+# Define las variables
+ARG KAFKA_USER_HOME=/usr/local/kafka
+ENV KAFKA_HOME=${KAFKA_USER_HOME}
+
+# Establece el directorio de trabajo
+WORKDIR ${KAFKA_HOME}
+
+# Copy project
+COPY kafka_2.13-3.5.0 ${KAFKA_HOME}
+
+EXPOSE 9092
+
+CMD ["bin/kafka-server-start.sh", "config/server.properties"]

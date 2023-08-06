@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    build: 
+      context: ./CONTENEDOR1
+      dockerfile: Dockerfile-zookeeper
+    ports:
+      - 2181:2181
+      - 2888:2888
+      - 3888:3888
+    environment:
+      - KAFKA_USER_HOME=/usr/local/kafka
+    volumes:
+      - ./CONTENEDOR1/apache-zookeeper-3.8.1-bin:/usr/local/kafka  # replace with the actual directory
+    restart: always
+
+  kafka:
+    build: 
+      context: ./CONTENEDOR2
+      dockerfile: Dockerfile-kafka
+    ports:
+      - 9092:9092
+    environment:
+      - KAFKA_USER_HOME=/usr/local/kafka
+    volumes:
+      - ./CONTENEDOR2/kafka_2.13-3.5.0:/usr/local/kafka  # replace with the actual directory
+    depends_on:
+      - zookeeper
+    restart: always
